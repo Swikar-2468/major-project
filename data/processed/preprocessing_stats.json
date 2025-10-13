@@ -1,0 +1,34 @@
+{
+  "train_size": 4928,
+  "val_size": 870,
+  "test_size": 1450,
+  "total_size": 7248,
+  "class_distribution_train": {
+    "NO": 3028,
+    "OO": 1657,
+    "OR": 185,
+    "OS": 58
+  },
+  "class_distribution_val": {
+    "NO": 534,
+    "OO": 293,
+    "OR": 33,
+    "OS": 10
+  },
+  "class_distribution_test": {
+    "NO": 896,
+    "OO": 486,
+    "OR": 49,
+    "OS": 19
+  },
+  "avg_text_length_words": {
+    "train": 17.243506493506494,
+    "val": 17.489655172413794,
+    "test": 17.044137931034484
+  },
+  "devanagari_percentage": {
+    "train": 60.12581168831169,
+    "val": 58.160919540229884,
+    "test": 60.0
+  }
+}
