@@ -461,65 +461,7 @@ def main():
                     st.text("Preprocessed:")
                     st.code(result['preprocessed_text'])
 
-            # ----------------- Feedback Form -----------------
-            if 'last_prediction' in st.session_state:
-                if "feedback_submitted" not in st.session_state:
-                    st.session_state.feedback_submitted = False
-                if "feedback_type" not in st.session_state:
-                    st.session_state.feedback_type = None
-                if "correct_label" not in st.session_state:
-                    st.session_state.correct_label = None
-                if "feedback_comment" not in st.session_state:
-                    st.session_state.feedback_comment = None
-
-                st.markdown("---")
-                st.subheader("💬 Provide Feedback")
-
-                with st.form("feedback_form"):
-                    st.session_state.feedback_type = st.radio(
-                        "Was this prediction correct?",
-                        ["✅ Correct", "❌ Incorrect"]
-                    )
-
-                    if st.session_state.feedback_type == "❌ Incorrect":
-                        st.session_state.correct_label = st.selectbox(
-                            "Correct label:",
-                            list(label_encoder.classes_)
-                        )
-                        st.session_state.feedback_comment = st.text_input("Comment (optional)")
-                    else:
-                        st.session_state.correct_label = None
-                        st.session_state.feedback_comment = None
-
-                    submit_button = st.form_submit_button("📤 Submit Feedback")
-
-                    if submit_button:
-                        stored = st.session_state.last_prediction.copy()
-                        stored["correct_label"] = st.session_state.correct_label if st.session_state.feedback_type == "❌ Incorrect" else stored["prediction"]
-                        stored["is_correct"] = (st.session_state.feedback_type == "✅ Correct")
-
-                        feedback_data = {
-                            "feedback_type": "correct" if st.session_state.feedback_type == "✅ Correct" else "incorrect",
-                            "correct_label": st.session_state.correct_label,
-                            "comment": st.session_state.feedback_comment
-                        }
-
-                        success = save_prediction_to_file(st.session_state.last_text, stored, feedback=feedback_data)
-
-                        if success:
-                            st.success("Feedback saved! 🎉")
-                            st.session_state.feedback_submitted = True
-                            # Reset form inputs
-                            st.session_state.feedback_type = None
-                            st.session_state.correct_label = None
-                            st.session_state.feedback_comment = None
-                        else:
-                            st.error("Failed to save feedback.")
-
-        elif analyze_button:
-            st.warning("⚠️ Please enter text to analyze.")
-
-    
+            
     # ========================================================================
     # TAB 2: BATCH ANALYSIS (DOWNLOAD BUTTON AFTER ANALYSIS)
     # ========================================================================
