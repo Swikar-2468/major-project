@@ -5,3 +5,4 @@ venv/
 *.pyc
 __pycache__/
 models/saved_models/xlm_roberta_results/
+models/saved_models/wandb/
