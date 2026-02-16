@@ -1,0 +1,64 @@
+[
+  {
+    "timestamp": "2026-02-16T14:51:57.973985",
+    "text": "Ma timilai maya garchu ❤️",
+    "prediction": "NO",
+    "confidence": 0.8912374973297119,
+    "probabilities": {
+      "NO": 0.8912374973297119,
+      "OO": 0.09116493165493011,
+      "OR": 0.002840758301317692,
+      "OS": 0.014756865799427032
+    },
+    "preprocessed_text": "ंअ तिमिलै मय गर्चु माया",
+    "emoji_features": {
+      "has_hate_emoji": 0,
+      "has_mockery_emoji": 0,
+      "has_positive_emoji": 0,
+      "has_sadness_emoji": 0,
+      "has_fear_emoji": 0,
+      "has_disgust_emoji": 0,
+      "hate_emoji_count": 0,
+      "mockery_emoji_count": 0,
+      "positive_emoji_count": 0,
+      "sadness_emoji_count": 0,
+      "fear_emoji_count": 0,
+      "disgust_emoji_count": 0,
+      "total_emoji_count": 1,
+      "hate_to_positive_ratio": 0.0,
+      "has_mixed_sentiment": 0
+    },
+    "feedback": null
+  },
+  {
+    "timestamp": "2026-02-16T15:04:05.795248",
+    "text": "Yo film atyanta ramro thiyo. Katha nikai rochak ra bhavuk thiyo, abhinaya utkrishta, sangeetle man chhunchha. Maile dui patak hereko chu ra ajhai herna man lagcha. Timilai pani sifaris garchu, ek patak herera hernuhos! 🎬❤️\n",
+    "prediction": "NO",
+    "confidence": 0.9470177292823792,
+    "probabilities": {
+      "NO": 0.9470177292823792,
+      "OO": 0.045235779136419296,
+      "OR": 0.0016704045701771975,
+      "OS": 0.006076101679354906
+    },
+    "preprocessed_text": "य़ो फ़िल्म् अत्यन्त रम्रो थियो. ख़थ निकै रोचक् र भवुक् थियो, अभिनय उत्क्रिश्त, सन्गीत्ले मन् छुन्छ. ंऐले दुइ पतक् हेरेको चु र अझै हेर्न मन् लग्च. टिमिलै पनि सिफ़रिस् गर्चु, एक् पतक् हेरेर हेर्नुहोस्! माया",
+    "emoji_features": {
+      "has_hate_emoji": 0,
+      "has_mockery_emoji": 0,
+      "has_positive_emoji": 0,
+      "has_sadness_emoji": 0,
+      "has_fear_emoji": 0,
+      "has_disgust_emoji": 0,
+      "hate_emoji_count": 0,
+      "mockery_emoji_count": 0,
+      "positive_emoji_count": 0,
+      "sadness_emoji_count": 0,
+      "fear_emoji_count": 0,
+      "disgust_emoji_count": 0,
+      "total_emoji_count": 2,
+      "hate_to_positive_ratio": 0.0,
+      "has_mixed_sentiment": 0
+    },
+    "feedback": null
+  }
+]
