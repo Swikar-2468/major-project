@@ -166,19 +166,28 @@ def apply_nepali_font(ax, nepali_font: Optional[FontProperties] = None,
     if is_tick_labels or texts is None:
         for txt in ax.get_yticklabels():
             text_content = txt.get_text()
-            if regex.search(r'\p{Devanagari}', text_content):
+            # Only apply if has Devanagari AND no emojis
+            has_devanagari = bool(regex.search(r'\p{Devanagari}', text_content))
+            has_emoji = any(c in emoji.EMOJI_DATA for c in text_content)
+            
+            if has_devanagari and not has_emoji:
                 txt.set_fontproperties(nepali_font)
                 txt.set_fontsize(11)
     else:
         for txt in texts:
             text_content = txt.get_text()
-            if regex.search(r'\p{Devanagari}', text_content):
+            has_devanagari = bool(regex.search(r'\p{Devanagari}', text_content))
+            has_emoji = any(c in emoji.EMOJI_DATA for c in text_content)
+            
+            if has_devanagari and not has_emoji:
                 txt.set_fontproperties(nepali_font)
 
 
 def create_display_text_with_emojis(original_text: str, preprocessed_text: str) -> Tuple[List[str], List[str]]:
     """
     Create aligned display tokens preserving emojis
+    
+    Handles multi-word emoji translations like: 😡 → "ठूलो रिस" (2 words)
     
     Args:
         original_text: Original text with emojis
@@ -187,8 +196,16 @@ def create_display_text_with_emojis(original_text: str, preprocessed_text: str) 
     Returns:
         Tuple of (display_tokens, model_tokens)
     """
+    from scripts.transformer_data_preprocessing import EMOJI_TO_NEPALI
+    
     original_tokens = original_text.split()
     preprocessed_tokens = preprocessed_text.split()
+    
+    # Build emoji to word count mapping (how many words each emoji becomes)
+    emoji_word_counts = {}
+    for emoji_char, nepali_text in EMOJI_TO_NEPALI.items():
+        word_count = len(nepali_text.split())
+        emoji_word_counts[emoji_char] = word_count
     
     display_tokens = []
     model_tokens = []
@@ -206,18 +223,35 @@ def create_display_text_with_emojis(original_text: str, preprocessed_text: str) 
             # Display: keep original emoji
             display_tokens.append(orig_token)
             
-            # Model: use Nepali translation
-            if proc_idx < len(preprocessed_tokens):
-                if all(c in emoji.EMOJI_DATA or c.isspace() for c in orig_token):
-                    # Pure emoji
+            # Model: use Nepali translation (may be multiple words!)
+            # Count how many emojis in this token
+            emojis_in_token = [c for c in orig_token if c in emoji.EMOJI_DATA]
+            
+            if emojis_in_token:
+                # Calculate total words needed for all emojis in this token
+                total_words_needed = sum(
+                    emoji_word_counts.get(e, 1) for e in emojis_in_token
+                )
+                
+                # Collect that many preprocessed tokens
+                nepali_words = []
+                for _ in range(total_words_needed):
+                    if proc_idx < len(preprocessed_tokens):
+                        nepali_words.append(preprocessed_tokens[proc_idx])
+                        proc_idx += 1
+                
+                # Join them as the model token
+                if nepali_words:
+                    model_tokens.append(' '.join(nepali_words))
+                else:
+                    model_tokens.append(orig_token)
+            else:
+                # Shouldn't happen, but fallback
+                if proc_idx < len(preprocessed_tokens):
                     model_tokens.append(preprocessed_tokens[proc_idx])
                     proc_idx += 1
                 else:
-                    # Mixed token
-                    model_tokens.append(preprocessed_tokens[proc_idx])
-                    proc_idx += 1
-            else:
-                model_tokens.append(orig_token)
+                    model_tokens.append(orig_token)
         else:
             # No emoji: use preprocessed for both
             if proc_idx < len(preprocessed_tokens):
@@ -299,12 +333,63 @@ class LIMEExplainer:
                     score += weight
             word_scores.append((display_tok, score))
         
+        # Merge multi-word emoji attributions
+        word_scores = self._merge_multi_word_emojis(word_scores)
+        
         return {
             'word_scores': word_scores,
             'display_tokens': display_tokens,
             'model_tokens': model_tokens,
             'lime_explanation': exp
         }
+    
+    def _merge_multi_word_emojis(self, word_scores: List[Tuple[str, float]]) -> List[Tuple[str, float]]:
+        """
+        Merge attributions for multi-word emoji translations like: ठूलो रिस → 😡
+        
+        Args:
+            word_scores: List of (word, score) tuples
+        
+        Returns:
+            Merged list with multi-word emojis combined
+        """
+        from scripts.transformer_data_preprocessing import EMOJI_TO_NEPALI
+        
+        # Build set of multi-word phrases
+        multi_word_phrases = {}
+        for emoji_char, nepali_text in EMOJI_TO_NEPALI.items():
+            if ' ' in nepali_text:
+                multi_word_phrases[nepali_text] = emoji_char
+        
+        # Merge consecutive words that form multi-word emoji phrases
+        merged_scores = []
+        i = 0
+        while i < len(word_scores):
+            word, score = word_scores[i]
+            
+            # Check if this word + next word(s) form a multi-word emoji phrase
+            merged = False
+            for phrase, emoji_char in multi_word_phrases.items():
+                phrase_words = phrase.split()
+                if i + len(phrase_words) <= len(word_scores):
+                    # Check if consecutive words match the phrase
+                    candidate_words = [word_scores[i + j][0] for j in range(len(phrase_words))]
+                    candidate_phrase = ' '.join(candidate_words)
+                    
+                    if candidate_phrase == phrase:
+                        # Found a multi-word emoji phrase - merge their scores
+                        total_score = sum(word_scores[i + j][1] for j in range(len(phrase_words)))
+                        
+                        merged_scores.append((emoji_char, total_score))
+                        i += len(phrase_words)  # Skip all words in the phrase
+                        merged = True
+                        break
+            
+            if not merged:
+                merged_scores.append((word, score))
+                i += 1
+        
+        return merged_scores
     
     def visualize(self, word_scores: List[Tuple[str, float]], save_path: Optional[str] = None,
                  show: bool = True, figsize: Tuple[int, int] = None):
@@ -324,7 +409,10 @@ class LIMEExplainer:
             print("⚠️ No words to visualize")
             return None
         
-        features, weights = zip(*word_scores)
+        # Replace underscores with spaces for display
+        word_scores_display = [(w.replace('_', ' '), score) for w, score in word_scores]
+        
+        features, weights = zip(*word_scores_display)
         y_pos = range(len(features))
         
         if figsize is None:
@@ -438,14 +526,19 @@ class SHAPExplainer:
             shap_tokens = list(sv.data)
             values_array = np.array(sv.values)
             
+            # Validate that we got meaningful results
+            if len(shap_tokens) == 0 or values_array.size == 0:
+                raise ValueError("SHAP returned empty results")
+            
             method_used = "shap"
             
         except Exception as e:
             if not use_fallback:
                 raise e
             
-            print(f"⚠️ SHAP failed: {e}")
-            print("📊 Using fallback gradient-based attribution...")
+            # Use fallback silently (only show in debug mode)
+            import logging
+            logging.debug(f"SHAP failed: {e}, using gradient fallback")
             
             shap_tokens, values_array = self._gradient_based_attribution(preprocessed_text)
             method_used = "gradient"
@@ -473,6 +566,9 @@ class SHAPExplainer:
         word_scores = self._align_shap_values(
             display_tokens, model_tokens, shap_tokens, token_values
         )
+        
+        # Merge multi-word emoji attributions
+        word_scores = self._merge_multi_word_emojis(word_scores)
         
         return {
             'word_scores': word_scores,
@@ -513,7 +609,59 @@ class SHAPExplainer:
             attribution = base_score - masked_score
             attributions.append(attribution)
         
+        # Ensure we have at least one attribution
+        if len(attributions) == 0:
+            attributions = [0.0] * len(words)
+        
         return words, np.array(attributions)
+    
+    def _merge_multi_word_emojis(self, word_scores: List[Tuple[str, float]]) -> List[Tuple[str, float]]:
+        """
+        Merge attributions for multi-word emoji translations like: ठूलो रिस → 😡
+        
+        Args:
+            word_scores: List of (word, score) tuples
+        
+        Returns:
+            Merged list with multi-word emojis combined
+        """
+        from scripts.transformer_data_preprocessing import EMOJI_TO_NEPALI
+        
+        # Build set of multi-word phrases
+        multi_word_phrases = {}
+        for emoji_char, nepali_text in EMOJI_TO_NEPALI.items():
+            if ' ' in nepali_text:
+                multi_word_phrases[nepali_text] = emoji_char
+        
+        # Merge consecutive words that form multi-word emoji phrases
+        merged_scores = []
+        i = 0
+        while i < len(word_scores):
+            word, score = word_scores[i]
+            
+            # Check if this word + next word(s) form a multi-word emoji phrase
+            merged = False
+            for phrase, emoji_char in multi_word_phrases.items():
+                phrase_words = phrase.split()
+                if i + len(phrase_words) <= len(word_scores):
+                    # Check if consecutive words match the phrase
+                    candidate_words = [word_scores[i + j][0] for j in range(len(phrase_words))]
+                    candidate_phrase = ' '.join(candidate_words)
+                    
+                    if candidate_phrase == phrase:
+                        # Found a multi-word emoji phrase - merge their scores
+                        total_score = sum(word_scores[i + j][1] for j in range(len(phrase_words)))
+                        
+                        merged_scores.append((emoji_char, total_score))
+                        i += len(phrase_words)  # Skip all words in the phrase
+                        merged = True
+                        break
+            
+            if not merged:
+                merged_scores.append((word, score))
+                i += 1
+        
+        return merged_scores
     
     def _align_shap_values(self, display_tokens: List[str], model_tokens: List[str],
                           shap_tokens: List[str], token_values: np.ndarray) -> List[Tuple[str, float]]:
@@ -556,7 +704,12 @@ class SHAPExplainer:
             print("⚠️ No words to visualize")
             return None
         
-        max_val = max(abs(v) for _, v in word_scores) + 1e-6
+        # Safe max calculation with fallback
+        abs_vals = [abs(v) for _, v in word_scores]
+        if not abs_vals or all(v == 0 for v in abs_vals):
+            max_val = 1.0  # Default to 1.0 if all values are zero
+        else:
+            max_val = max(abs_vals) + 1e-6
         
         if figsize is None:
             figsize = (max(10, 0.5 * len(word_scores)), 3)
@@ -568,6 +721,9 @@ class SHAPExplainer:
         text_objs = []
         
         for word, val in word_scores:
+            # Replace underscores with spaces for display
+            display_word = word.replace('_', ' ')
+            
             # Color intensity
             intensity = min(abs(val) / max_val, 1.0)
             
@@ -578,7 +734,7 @@ class SHAPExplainer:
                 color = (1.0 - intensity * 0.7, 1.0, 1.0 - intensity * 0.7)
             
             txt = ax.text(
-                x, y, f" {word} ",
+                x, y, f" {display_word} ",
                 fontsize=14,
                 bbox=dict(
                     facecolor=color,
@@ -590,8 +746,8 @@ class SHAPExplainer:
             text_objs.append(txt)
             
             # Update position (emojis take less space)
-            char_width = 0.025 if any(c in emoji.EMOJI_DATA for c in word) else 0.04
-            x += char_width * len(word) + 0.01
+            char_width = 0.025 if any(c in emoji.EMOJI_DATA for c in display_word) else 0.04
+            x += char_width * len(display_word) + 0.01
             
             if x > 0.92:
                 x = 0.01

@@ -60,5 +60,284 @@
       "has_mixed_sentiment": 0
     },
     "feedback": null
+  },
+  {
+    "timestamp": "2026-02-19T13:40:30.666698",
+    "text": "दलितहरुको जात नै फोहोर हो, छोइछिटो हाल्नुपर्छ। पानी छोए पनि अशुद्ध हुन्छ, यस्ता जातलाई कसरी राख्ने समाजमा? 😷",
+    "prediction": "OR",
+    "confidence": 0.9913627505302429,
+    "probabilities": {
+      "NO": 0.00329648912884295,
+      "OO": 0.0025973862502723932,
+      "OR": 0.9913627505302429,
+      "OS": 0.0027434690855443478
+    },
+    "preprocessed_text": "दलितहरुको जात नै फोहोर हो, छोइछिटो हाल्नुपर्छ. पानी छोए पनि अशुद्ध हुन्छ, यस्ता जातलाई कसरी राख्ने समाजमा? बिरामी",
+    "emoji_features": {
+      "has_hate_emoji": 0,
+      "has_mockery_emoji": 0,
+      "has_positive_emoji": 0,
+      "has_sadness_emoji": 0,
+      "has_fear_emoji": 0,
+      "has_disgust_emoji": 1,
+      "hate_emoji_count": 0,
+      "mockery_emoji_count": 0,
+      "positive_emoji_count": 0,
+      "sadness_emoji_count": 0,
+      "fear_emoji_count": 0,
+      "disgust_emoji_count": 1,
+      "total_emoji_count": 1,
+      "hate_to_positive_ratio": 0.0,
+      "has_mixed_sentiment": 0
+    },
+    "feedback": null
+  },
+  {
+    "timestamp": "2026-02-19T13:55:39.191056",
+    "text": "पोथी बस्यो भनेर राष्ट्रपति बनायो, अब देश डुबिहाल्छ। १८ करोडको गाडी चढेर जनताको दुख बुझ्दिनन् यस्ती आइमाईले 😡🚗",
+    "prediction": "OS",
+    "confidence": 0.9610629081726074,
+    "probabilities": {
+      "NO": 0.020100736990571022,
+      "OO": 0.014752360992133617,
+      "OR": 0.004083971492946148,
+      "OS": 0.9610629081726074
+    },
+    "preprocessed_text": "पोथी बस्यो भनेर राष्ट्रपति बनायो, अब देश डुबिहाल्छ. १८ करोडको गाडी चढेर जनताको दुख बुझ्दिनन् यस्ती आइमाईले ठूलो रिस",
+    "emoji_features": {
+      "has_hate_emoji": 1,
+      "has_mockery_emoji": 0,
+      "has_positive_emoji": 0,
+      "has_sadness_emoji": 0,
+      "has_fear_emoji": 0,
+      "has_disgust_emoji": 0,
+      "hate_emoji_count": 1,
+      "mockery_emoji_count": 0,
+      "positive_emoji_count": 0,
+      "sadness_emoji_count": 0,
+      "fear_emoji_count": 0,
+      "disgust_emoji_count": 0,
+      "total_emoji_count": 2,
+      "hate_to_positive_ratio": 1.0,
+      "has_mixed_sentiment": 0
+    },
+    "feedback": null
+  },
+  {
+    "timestamp": "2026-02-19T14:18:10.929356",
+    "text": "राम्रो काम गरेको छौ, शाबास! Keep it up bro 🔥",
+    "prediction": "NO",
+    "confidence": 0.924784779548645,
+    "probabilities": {
+      "NO": 0.924784779548645,
+      "OO": 0.06998666375875473,
+      "OR": 0.002364357467740774,
+      "OS": 0.002864247187972069
+    },
+    "preprocessed_text": "राम्रो काम गरेको छौ, शाबास! जारी राख्नुहोस् दाजु आगो",
+    "emoji_features": {
+      "has_hate_emoji": 0,
+      "has_mockery_emoji": 0,
+      "has_positive_emoji": 0,
+      "has_sadness_emoji": 0,
+      "has_fear_emoji": 0,
+      "has_disgust_emoji": 0,
+      "hate_emoji_count": 0,
+      "mockery_emoji_count": 0,
+      "positive_emoji_count": 0,
+      "sadness_emoji_count": 0,
+      "fear_emoji_count": 0,
+      "disgust_emoji_count": 0,
+      "total_emoji_count": 1,
+      "hate_to_positive_ratio": 0.0,
+      "has_mixed_sentiment": 0
+    },
+    "feedback": null
+  },
+  {
+    "timestamp": "2026-02-19T14:40:04.866815",
+    "text": "\"आइमाईहरुको दिमाग बच्चा पाल्ने बाहेक केही काम लाग्दैन, पढे पनि श्रीमान्को खुट्टा धुने पानी बन्छन् मात्र 😂\"",
+    "prediction": "OS",
+    "confidence": 0.9979508519172668,
+    "probabilities": {
+      "NO": 0.0008278369205072522,
+      "OO": 0.0005404507974162698,
+      "OR": 0.0006808824837207794,
+      "OS": 0.9979508519172668
+    },
+    "preprocessed_text": "\"आइमाईहरुको दिमाग बच्चा पाल्ने बाहेक केही काम लाग्दैन, पढे पनि श्रीमान्को खुट्टा धुने पानी बन्छन् मात्र हाँसो \"",
+    "emoji_features": {
+      "has_hate_emoji": 0,
+      "has_mockery_emoji": 0,
+      "has_positive_emoji": 0,
+      "has_sadness_emoji": 0,
+      "has_fear_emoji": 0,
+      "has_disgust_emoji": 0,
+      "hate_emoji_count": 0,
+      "mockery_emoji_count": 0,
+      "positive_emoji_count": 0,
+      "sadness_emoji_count": 0,
+      "fear_emoji_count": 0,
+      "disgust_emoji_count": 0,
+      "total_emoji_count": 1,
+      "hate_to_positive_ratio": 0.0,
+      "has_mixed_sentiment": 0
+    },
+    "feedback": null
+  },
+  {
+    "timestamp": "2026-02-19T19:18:44.200405",
+    "text": "\"आइमाईहरुको दिमाग बच्चा पाल्ने बाहेक केही काम लाग्दैन, पढे पनि श्रीमान्को खुट्टा धुने पानी बन्छन् मात्र 😂\"\n",
+    "prediction": "OS",
+    "confidence": 0.9981986880302429,
+    "probabilities": {
+      "NO": 0.0006988784880377352,
+      "OO": 0.00048272215644828975,
+      "OR": 0.0006197870243340731,
+      "OS": 0.9981986880302429
+    },
+    "preprocessed_text": "आइमाईहरुको दिमाग बच्चा पाल्ने बाहेक केही काम लाग्दैन, पढे पनि श्रीमान्को खुट्टा धुने पानी बन्छन् मात्र हाँसो",
+    "emoji_features": {
+      "has_hate_emoji": 0,
+      "has_mockery_emoji": 0,
+      "has_positive_emoji": 0,
+      "has_sadness_emoji": 0,
+      "has_fear_emoji": 0,
+      "has_disgust_emoji": 0,
+      "hate_emoji_count": 0,
+      "mockery_emoji_count": 0,
+      "positive_emoji_count": 0,
+      "sadness_emoji_count": 0,
+      "fear_emoji_count": 0,
+      "disgust_emoji_count": 0,
+      "total_emoji_count": 1,
+      "hate_to_positive_ratio": 0.0,
+      "has_mixed_sentiment": 0
+    },
+    "feedback": null
+  },
+  {
+    "timestamp": "2026-02-19T19:43:10.294338",
+    "text": "\"Keti haru ko kaam bhaneko घरमा बस्ने हो, bahira hidne kina? 🤦‍♀️\"\n\n",
+    "prediction": "OS",
+    "confidence": 0.9959678649902344,
+    "probabilities": {
+      "NO": 0.0010372335091233253,
+      "OO": 0.0008447224972769618,
+      "OR": 0.0021502228919416666,
+      "OS": 0.9959678649902344
+    },
+    "preprocessed_text": "ख़ेति हरु को काम् भनेको घरमा बस्ने हो, बहिर हिद्ने किन?",
+    "emoji_features": {
+      "has_hate_emoji": 0,
+      "has_mockery_emoji": 0,
+      "has_positive_emoji": 0,
+      "has_sadness_emoji": 0,
+      "has_fear_emoji": 0,
+      "has_disgust_emoji": 0,
+      "hate_emoji_count": 0,
+      "mockery_emoji_count": 0,
+      "positive_emoji_count": 0,
+      "sadness_emoji_count": 0,
+      "fear_emoji_count": 0,
+      "disgust_emoji_count": 0,
+      "total_emoji_count": 2,
+      "hate_to_positive_ratio": 0.0,
+      "has_mixed_sentiment": 0
+    },
+    "feedback": null
+  },
+  {
+    "timestamp": "2026-02-19T20:47:35.598072",
+    "text": "\"यो पोथी haru le desh bigareko cha, dimaag ma ta makeup ra selfie matra hunchha 😡😡😡😡\"\n",
+    "prediction": "OO",
+    "confidence": 0.7976535558700562,
+    "probabilities": {
+      "NO": 0.03888121247291565,
+      "OO": 0.7976535558700562,
+      "OR": 0.03757254406809807,
+      "OS": 0.12589271366596222
+    },
+    "preprocessed_text": "यो पोथी हरु ले देश् बिगरेको च, दिमाग् म त मकेउप् र सेल्फ़िए मत्र हुन्छ ठूलो रिस ठूलो रिस ठूलो रिस ठूलो रिस",
+    "emoji_features": {
+      "has_hate_emoji": 1,
+      "has_mockery_emoji": 0,
+      "has_positive_emoji": 0,
+      "has_sadness_emoji": 0,
+      "has_fear_emoji": 0,
+      "has_disgust_emoji": 0,
+      "hate_emoji_count": 4,
+      "mockery_emoji_count": 0,
+      "positive_emoji_count": 0,
+      "sadness_emoji_count": 0,
+      "fear_emoji_count": 0,
+      "disgust_emoji_count": 0,
+      "total_emoji_count": 4,
+      "hate_to_positive_ratio": 4.0,
+      "has_mixed_sentiment": 0
+    },
+    "feedback": null
+  },
+  {
+    "timestamp": "2026-02-20T19:17:11.048700",
+    "text": "\"Pothiharu le desh chalauna sakdainan, bhaawana ma matra bagchhan. Purush le nai chalaunu parchha yo desh, natra dubchha 💔\"\n",
+    "prediction": "OS",
+    "confidence": 0.995226263999939,
+    "probabilities": {
+      "NO": 0.0010656999656930566,
+      "OO": 0.0009885559557005763,
+      "OR": 0.0027194831054657698,
+      "OS": 0.995226263999939
+    },
+    "preprocessed_text": "Pओथिहरु ले देश् चलौन सक्दैनन्, भावन म मत्र बग्छन्. Pउरुश् ले नै चलौनु पर्छ यो देश्, नत्र दुब्छ टुटेको मन",
+    "emoji_features": {
+      "has_hate_emoji": 1,
+      "has_mockery_emoji": 0,
+      "has_positive_emoji": 0,
+      "has_sadness_emoji": 0,
+      "has_fear_emoji": 0,
+      "has_disgust_emoji": 0,
+      "hate_emoji_count": 1,
+      "mockery_emoji_count": 0,
+      "positive_emoji_count": 0,
+      "sadness_emoji_count": 0,
+      "fear_emoji_count": 0,
+      "disgust_emoji_count": 0,
+      "total_emoji_count": 1,
+      "hate_to_positive_ratio": 1.0,
+      "has_mixed_sentiment": 0
+    },
+    "feedback": null
+  },
+  {
+    "timestamp": "2026-02-20T19:19:31.800267",
+    "text": "\"Ramro film thiyo, sabaile hernuhos. Malai ta runcha runcha lagyo 😭🎬\"\n",
+    "prediction": "NO",
+    "confidence": 0.8931559324264526,
+    "probabilities": {
+      "NO": 0.8931559324264526,
+      "OO": 0.09810610115528107,
+      "OR": 0.0014482184778898954,
+      "OS": 0.007289753295481205
+    },
+    "preprocessed_text": "ऱम्रो फ़िल्म् थियो, सबैले हेर्नुहोस्. ंअलै त रुन्च रुन्च लग्यो रुवाइ",
+    "emoji_features": {
+      "has_hate_emoji": 0,
+      "has_mockery_emoji": 0,
+      "has_positive_emoji": 0,
+      "has_sadness_emoji": 1,
+      "has_fear_emoji": 0,
+      "has_disgust_emoji": 0,
+      "hate_emoji_count": 0,
+      "mockery_emoji_count": 0,
+      "positive_emoji_count": 0,
+      "sadness_emoji_count": 1,
+      "fear_emoji_count": 0,
+      "disgust_emoji_count": 0,
+      "total_emoji_count": 2,
+      "hate_to_positive_ratio": 0.0,
+      "has_mixed_sentiment": 0
+    },
+    "feedback": null
   }
 ]

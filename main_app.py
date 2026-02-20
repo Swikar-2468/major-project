@@ -172,6 +172,10 @@ if 'last_text' not in st.session_state:
     st.session_state.last_text = ""
 if 'batch_results' not in st.session_state:
     st.session_state.batch_results = None
+if 'batch_mode' not in st.session_state:
+    st.session_state.batch_mode = None
+if 'csv_text_column' not in st.session_state:
+    st.session_state.csv_text_column = None
 if 'explainability_results' not in st.session_state:
     st.session_state.explainability_results = None
 if 'preprocessor' not in st.session_state:
@@ -411,6 +415,190 @@ def save_prediction_to_history(text, result, feedback=None):
 
 
 # ============================================================================
+# BATCH EXPLAINABILITY HELPER
+# ============================================================================
+
+def render_batch_explainability(results_df, text_column, model, tokenizer, label_encoder, 
+                                preprocessor, nepali_font, explainability_available, 
+                                captum_available, mode_key="batch"):
+    """
+    Render explainability UI for batch results.
+    
+    Args:
+        results_df: DataFrame with batch results
+        text_column: Name of column containing full text
+        model: Model instance
+        tokenizer: Tokenizer instance
+        label_encoder: Label encoder
+        preprocessor: Preprocessor instance
+        nepali_font: Nepali font properties
+        explainability_available: Dict with lime/shap availability
+        captum_available: Whether Captum is available
+        mode_key: Unique key prefix for widgets ("batch" or "csv")
+    """
+    if not CUSTOM_MODULES_AVAILABLE:
+        st.warning("⚠️ Explainability not available.")
+        return
+    
+    if not (explainability_available['lime'] or explainability_available['shap'] or captum_available):
+        st.warning("⚠️ No explainability methods available.")
+        return
+    
+    with st.expander("💡 Explain Individual Results", expanded=False):
+        st.markdown("**Select a text from the batch to explain:**")
+        
+        # Create selection dropdown
+        text_options = [f"Row {idx}: {str(row[text_column])[:50]}..." for idx, row in results_df.iterrows()]
+        selected_idx = st.selectbox(
+            "Choose text:", 
+            range(len(text_options)), 
+            format_func=lambda x: text_options[x], 
+            key=f"{mode_key}_select"
+        )
+        
+        selected_text = str(results_df.iloc[selected_idx][text_column])
+        selected_pred = results_df.iloc[selected_idx]['Prediction']
+        
+        st.write(f"**Selected:** {selected_text}")
+        st.write(f"**Prediction:** {selected_pred}")
+        
+        # Method selection
+        available_methods = []
+        if explainability_available['lime']:
+            available_methods.append("LIME")
+        if explainability_available['shap']:
+            available_methods.append("SHAP")
+        if captum_available:
+            available_methods.append("Captum (IG)")
+        
+        if not available_methods:
+            st.warning("⚠️ No explainability methods available.")
+            return
+        
+        explain_method = st.selectbox(
+            "Explanation method:", 
+            available_methods, 
+            key=f"{mode_key}_method"
+        )
+        
+        if st.button("🔍 Generate Explanation", key=f"{mode_key}_explain_btn"):
+            with st.spinner("Generating explanation..."):
+                try:
+                    # Create model wrapper if needed
+                    if st.session_state.model_wrapper is None:
+                        st.session_state.model_wrapper = create_explainer_wrapper(
+                            model, tokenizer, label_encoder, preprocessor
+                        )
+                    
+                    wrapper = st.session_state.model_wrapper
+                    
+                    # Clean text of quotes before processing
+                    clean_selected = selected_text.replace('"', '').replace("'", '').replace('"', '').replace('"', '')
+                    
+                    # Preprocess and analyze
+                    preprocessed, emoji_features = preprocessor.preprocess(clean_selected)
+                    analysis = wrapper.predict_with_analysis(clean_selected)
+                    
+                    if explain_method == "LIME":
+                        lime_exp = LIMEExplainer(wrapper, nepali_font=nepali_font)
+                        result = lime_exp.explain_and_visualize(
+                            analysis['original_text'],
+                            analysis['preprocessed_text'],
+                            save_path=None,
+                            show=False,
+                            num_samples=200
+                        )
+                        
+                        st.subheader("LIME Explanation")
+                        st.pyplot(result['figure'])
+                        
+                        # Show details directly without nested expander
+                        st.markdown("---")
+                        st.markdown("**📊 Feature Importance Details:**")
+                        word_scores = result['explanation']['word_scores']
+                        if word_scores:
+                            df = pd.DataFrame(word_scores, columns=['Word', 'Score'])
+                            df = df.sort_values('Score', ascending=False)
+                            st.dataframe(df, hide_index=True, use_container_width=True)
+                        else:
+                            st.warning("No word scores available")
+                    
+                    elif explain_method == "SHAP":
+                        shap_exp = SHAPExplainer(wrapper, nepali_font=nepali_font)
+                        result = shap_exp.explain_and_visualize(
+                            analysis['original_text'],
+                            analysis['preprocessed_text'],
+                            save_path=None,
+                            show=False,
+                            use_fallback=True
+                        )
+                        
+                        st.subheader("SHAP Explanation")
+                        st.pyplot(result['figure'])
+                        
+                        # Show details directly without nested expander
+                        st.markdown("---")
+                        st.markdown("**📊 Attribution Details:**")
+                        st.write(f"**Method used:** {result['explanation']['method_used']}")
+                        word_scores = result['explanation']['word_scores']
+                        if word_scores:
+                            df = pd.DataFrame(word_scores, columns=['Word', 'Score'])
+                            df = df.sort_values('Score', key=lambda x: abs(x), ascending=False)
+                            st.dataframe(df, hide_index=True, use_container_width=True)
+                        else:
+                            st.warning("No word scores available")
+                    
+                    elif explain_method == "Captum (IG)":
+                        captum_exp = CaptumExplainer(
+                            model, tokenizer, label_encoder, preprocessor,
+                            emoji_to_nepali_map=EMOJI_TO_NEPALI
+                        )
+                        result = captum_exp.explain_and_visualize(
+                            analysis['original_text'],
+                            target=None,
+                            n_steps=50,
+                            save_dir=None,
+                            show=False,
+                            nepali_font=nepali_font
+                        )
+                        
+                        st.subheader("Captum Integrated Gradients")
+                        
+                        col1, col2 = st.columns(2)
+                        with col1:
+                            st.markdown("**Bar Chart**")
+                            st.pyplot(result['bar_chart'])
+                        
+                        with col2:
+                            st.markdown("**Heatmap**")
+                            st.pyplot(result['heatmap'])
+                        
+                        # Show details directly without nested expander
+                        st.markdown("---")
+                        st.markdown("**📊 Attribution Details:**")
+                        st.write(f"**Convergence Delta:** {result['explanation']['convergence_delta']:.6f}")
+                        
+                        word_attrs = result['explanation']['word_attributions']
+                        if word_attrs:
+                            df = pd.DataFrame(
+                                word_attrs,
+                                columns=['Word', 'Abs Score', 'Signed Score']
+                            )
+                            df = df.sort_values('Abs Score', ascending=False)
+                            st.dataframe(df, hide_index=True, use_container_width=True)
+                        else:
+                            st.warning("No word attributions available")
+                
+                except Exception as e:
+                    st.error(f"❌ Explanation failed: {str(e)}")
+                    # Show error details directly without nested expander
+                    st.markdown("**🐛 Error Details:**")
+                    st.code(str(e))
+                    import traceback
+                    st.code(traceback.format_exc())
+
+
+# ============================================================================
 # MAIN APPLICATION
 # ============================================================================
 
@@ -635,7 +823,9 @@ def main():
                         script_info = get_script_info(text_input)
                         st.markdown("**Script Detected:**")
                         st.write(f"• Type: {script_info['script_type']}")
-                        st.write(f"• Confidence: {script_info['confidence']:.1%}")
+                        # Cap confidence at 100%
+                        confidence_pct = min(script_info['confidence'] * 100, 100.0)
+                        st.write(f"• Confidence: {confidence_pct:.1f}%")
             
             # Emoji features
             if result.get('emoji_features', {}).get('total_emoji_count', 0) > 0:
@@ -928,60 +1118,88 @@ def main():
                             
                             progress_bar.progress((idx + 1) / len(texts))
                         
+                        # Store in session state with mode flag
                         st.session_state.batch_results = pd.DataFrame(results)
-                        
-                        # Display
-                        st.success(f"✅ Analyzed {len(texts)} texts!")
-                        
-                        display_df = st.session_state.batch_results[['Text', 'Prediction', 'Confidence']].copy()
-                        display_df['Confidence'] = display_df['Confidence'].apply(lambda x: f"{x:.2%}")
-                        
-                        st.dataframe(display_df, use_container_width=True, hide_index=True, height=400)
-                        
-                        # Summary
-                        st.markdown("---")
-                        st.subheader("📊 Summary Statistics")
-                        
-                        col1, col2, col3 = st.columns(3)
-                        
-                        results_df = st.session_state.batch_results
-                        
-                        with col1:
-                            st.metric("Total Texts", len(results_df))
-                            st.metric("Avg Confidence", f"{results_df['Confidence'].mean():.2%}")
-                        
-                        with col2:
-                            summary = results_df['Prediction'].value_counts()
-                            fig = px.pie(
-                                values=summary.values,
-                                names=summary.index,
-                                title="Prediction Distribution",
-                                color_discrete_sequence=px.colors.qualitative.Set2
-                            )
-                            st.plotly_chart(fig, use_container_width=True)
-                        
-                        with col3:
-                            # Class breakdown
-                            st.markdown("**Class Breakdown:**")
-                            for label, count in summary.items():
-                                pct = count / len(results_df) * 100
-                                st.write(f"• {label}: {count} ({pct:.1f}%)")
-                        
-                        # Download
-                        st.markdown("---")
-                        download_df = results_df[['Full_Text', 'Prediction', 'Confidence', 'Preprocessed']]
-                        download_df.columns = ['Text', 'Prediction', 'Confidence', 'Preprocessed']
-                        csv = download_df.to_csv(index=False)
-                        
-                        st.download_button(
-                            label="📥 Download Results CSV",
-                            data=csv,
-                            file_name=f"batch_results_{datetime.now().strftime('%Y%m%d_%H%M%S')}.csv",
-                            mime="text/csv",
-                            use_container_width=True
-                        )
+                        st.session_state.batch_mode = 'text_area'
+                        st.rerun()
                 else:
-                    st.warning("Please enter some text.")
+                    st.warning("Please enter some texts.")
+            
+            # Display results OUTSIDE button block if they exist
+            if (st.session_state.batch_results is not None and 
+                st.session_state.get('batch_mode') == 'text_area'):
+                
+                results_df = st.session_state.batch_results
+                
+                st.success(f"✅ Analyzed {len(results_df)} texts!")
+                
+                display_df = results_df[['Text', 'Prediction', 'Confidence']].copy()
+                display_df['Confidence'] = display_df['Confidence'].apply(lambda x: f"{x:.2%}")
+                
+                st.dataframe(display_df, use_container_width=True, hide_index=True, height=400)
+                
+                # Summary
+                st.markdown("---")
+                st.subheader("📊 Summary Statistics")
+                
+                col1, col2, col3 = st.columns(3)
+                
+                with col1:
+                    st.metric("Total Texts", len(results_df))
+                    st.metric("Avg Confidence", f"{results_df['Confidence'].mean():.2%}")
+                
+                with col2:
+                    summary = results_df['Prediction'].value_counts()
+                    fig = px.pie(
+                        values=summary.values,
+                        names=summary.index,
+                        title="Prediction Distribution",
+                        color_discrete_sequence=px.colors.qualitative.Set2
+                    )
+                    st.plotly_chart(fig, use_container_width=True)
+                
+                with col3:
+                    # Class breakdown
+                    st.markdown("**Class Breakdown:**")
+                    for label, count in summary.items():
+                        pct = count / len(results_df) * 100
+                        st.write(f"• {label}: {count} ({pct:.1f}%)")
+                
+                # Download - MOVED OUTSIDE col3
+                st.markdown("---")
+                download_df = results_df[['Full_Text', 'Prediction', 'Confidence', 'Preprocessed']]
+                download_df.columns = ['Text', 'Prediction', 'Confidence', 'Preprocessed']
+                csv = download_df.to_csv(index=False)
+                
+                col_download, col_explain = st.columns(2)
+                
+                with col_download:
+                    st.download_button(
+                        label="📥 Download Results CSV",
+                        data=csv,
+                        file_name=f"batch_results_{datetime.now().strftime('%Y%m%d_%H%M%S')}.csv",
+                        mime="text/csv",
+                        use_container_width=True,
+                        key="download_batch_text"
+                    )
+                
+                with col_explain:
+                    if st.button("💡 Explain Selected", use_container_width=True, key="hint_batch_text"):
+                        st.info("👇 Select a text below to explain")
+                
+                # Add explainability for batch results using helper function
+                render_batch_explainability(
+                    results_df=results_df,
+                    text_column='Full_Text',
+                    model=model,
+                    tokenizer=tokenizer,
+                    label_encoder=label_encoder,
+                    preprocessor=preprocessor,
+                    nepali_font=nepali_font,
+                    explainability_available=explainability_available,
+                    captum_available=captum_available,
+                    mode_key="text_area"
+                )
         
         else:  # CSV Upload
             st.info("💡 Upload CSV with a 'text' column")
@@ -1025,51 +1243,87 @@ def main():
                             df['Confidence'] = confidences
                             df['Preprocessed'] = preprocessed_list
                             
-                            st.success("✅ Analysis complete!")
-                            st.dataframe(df, use_container_width=True, height=400)
+                            # Store in session state with mode and column info
+                            st.session_state.batch_results = df
+                            st.session_state.batch_mode = 'csv'
+                            st.session_state.csv_text_column = text_column
+                            st.rerun()
+                    
+                    # Display results OUTSIDE button block if they exist
+                    if (st.session_state.batch_results is not None and 
+                        st.session_state.get('batch_mode') == 'csv'):
+                        
+                        df_results = st.session_state.batch_results
+                        text_col = st.session_state.get('csv_text_column', text_column)
+                        
+                        st.success("✅ Analysis complete!")
+                        st.dataframe(df_results, use_container_width=True, height=400)
+                        
+                        # Summary
+                        st.markdown("---")
+                        st.subheader("📊 Summary")
+                        
+                        col1, col2 = st.columns(2)
+                        
+                        with col1:
+                            summary = df_results['Prediction'].value_counts()
+                            fig = px.bar(
+                                x=summary.index,
+                                y=summary.values,
+                                title="Prediction Distribution",
+                                labels={'x': 'Class', 'y': 'Count'},
+                                color=summary.index,
+                                color_discrete_map={
+                                    'NO': '#28a745',
+                                    'OO': '#ffc107',
+                                    'OR': '#dc3545',
+                                    'OS': '#6f42c1'
+                                }
+                            )
+                            st.plotly_chart(fig, use_container_width=True)
+                        
+                        with col2:
+                            st.metric("Total Texts", len(df_results))
+                            st.metric("Avg Confidence", f"{df_results['Confidence'].mean():.2%}")
                             
-                            # Summary
-                            st.markdown("---")
-                            st.subheader("📊 Summary")
-                            
-                            col1, col2 = st.columns(2)
-                            
-                            with col1:
-                                summary = pd.Series(predictions).value_counts()
-                                fig = px.bar(
-                                    x=summary.index,
-                                    y=summary.values,
-                                    title="Prediction Distribution",
-                                    labels={'x': 'Class', 'y': 'Count'},
-                                    color=summary.index,
-                                    color_discrete_map={
-                                        'NO': '#28a745',
-                                        'OO': '#ffc107',
-                                        'OR': '#dc3545',
-                                        'OS': '#6f42c1'
-                                    }
-                                )
-                                st.plotly_chart(fig, use_container_width=True)
-                            
-                            with col2:
-                                st.metric("Total Texts", len(df))
-                                st.metric("Avg Confidence", f"{np.mean(confidences):.2%}")
-                                
-                                st.markdown("**Class Distribution:**")
-                                for label, count in summary.items():
-                                    st.write(f"• {label}: {count}")
-                            
-                            # Download
-                            st.markdown("---")
-                            csv = df.to_csv(index=False)
+                            st.markdown("**Class Distribution:**")
+                            for label, count in summary.items():
+                                st.write(f"• {label}: {count}")
+                        
+                        # Download - MOVED OUTSIDE col2
+                        st.markdown("---")
+                        csv_data = df_results.to_csv(index=False)
+                        
+                        col_download, col_explain = st.columns(2)
+                        
+                        with col_download:
                             st.download_button(
                                 label="📥 Download Results CSV",
-                                data=csv,
+                                data=csv_data,
                                 file_name=f"predictions_{datetime.now().strftime('%Y%m%d_%H%M%S')}.csv",
                                 mime="text/csv",
-                                use_container_width=True
+                                use_container_width=True,
+                                key="download_csv_results"
                             )
-                
+                        
+                        with col_explain:
+                            if st.button("💡 Explain Selected", use_container_width=True, key="csv_explain_hint"):
+                                st.info("👇 Use expander below to explain")
+                        
+                        # Add explainability for CSV results using helper function
+                        render_batch_explainability(
+                            results_df=df_results,
+                            text_column=text_col,
+                            model=model,
+                            tokenizer=tokenizer,
+                            label_encoder=label_encoder,
+                            preprocessor=preprocessor,
+                            nepali_font=nepali_font,
+                            explainability_available=explainability_available,
+                            captum_available=captum_available,
+                            mode_key="csv"
+                        )
+
                 except Exception as e:
                     st.error(f"❌ Error processing file: {str(e)}")
                     with st.expander("🐛 Error Details"):

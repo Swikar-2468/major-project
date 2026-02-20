@@ -85,7 +85,21 @@ def create_display_tokens_from_subwords(
         List of display tokens with emojis preserved (e.g., ["तेरी", "कसम", "😀", "😀"])
     """
     # Build reverse emoji mapping (Nepali text → emoji)
-    reverse_emoji_map = {nepali: emoji_char for emoji_char, nepali in emoji_to_nepali_map.items()}
+    # For multi-word translations like "ठूलो रिस", we need to handle them specially
+    reverse_emoji_map = {}
+    multi_word_emoji_map = {}  # For phrases like "ठूलो रिस"
+    
+    for emoji_char, nepali_text in emoji_to_nepali_map.items():
+        if ' ' in nepali_text:
+            # Multi-word translation
+            multi_word_emoji_map[nepali_text] = emoji_char
+            # Also map individual words (as fallback)
+            for word in nepali_text.split():
+                if word not in reverse_emoji_map:
+                    reverse_emoji_map[word] = emoji_char
+        else:
+            # Single word translation
+            reverse_emoji_map[nepali_text] = emoji_char
     
     # Clean and group tokenizer output into words
     word_pieces = []
@@ -114,12 +128,25 @@ def create_display_tokens_from_subwords(
     # Map word_pieces back to original with emojis
     display_tokens = []
     orig_idx = 0
+    word_idx = 0
     
-    for word in word_pieces:
-        # Check if this word is an emoji translation
+    while word_idx < len(word_pieces):
+        word = word_pieces[word_idx]
+        
+        # Check for multi-word emoji phrases first
+        if word_idx < len(word_pieces) - 1:
+            two_word_phrase = f"{word} {word_pieces[word_idx + 1]}"
+            if two_word_phrase in multi_word_emoji_map:
+                # Found a multi-word emoji translation - show emoji once
+                display_tokens.append(multi_word_emoji_map[two_word_phrase])
+                word_idx += 2  # Skip both words
+                continue
+        
+        # Check if this single word is an emoji translation
         if word in reverse_emoji_map:
             # This is a Nepali emoji translation → use the actual emoji
             display_tokens.append(reverse_emoji_map[word])
+            word_idx += 1
         else:
             # Regular word - try to match with original
             matched = False
@@ -146,6 +173,8 @@ def create_display_tokens_from_subwords(
             if not matched:
                 # Couldn't match - use the word as-is
                 display_tokens.append(word)
+            
+            word_idx += 1
     
     return display_tokens
 
@@ -157,7 +186,7 @@ def create_display_tokens_from_subwords(
 def apply_nepali_font(ax_or_text, nepali_font: Optional[FontProperties] = None,
                      is_axis: bool = True):
     """
-    Apply Nepali font to text containing Devanagari
+    Apply Nepali font to text containing Devanagari (but not emojis)
     
     Args:
         ax_or_text: Matplotlib axis or text object
@@ -171,13 +200,20 @@ def apply_nepali_font(ax_or_text, nepali_font: Optional[FontProperties] = None,
         # Apply to axis tick labels
         for lbl in ax_or_text.get_xticklabels():
             text_content = lbl.get_text()
-            if regex.search(r'\p{Devanagari}', text_content):
+            # Only apply if has Devanagari AND no emojis
+            has_devanagari = bool(regex.search(r'\p{Devanagari}', text_content))
+            has_emoji = any(c in emoji.EMOJI_DATA for c in text_content)
+            
+            if has_devanagari and not has_emoji:
                 lbl.set_fontproperties(nepali_font)
                 lbl.set_fontsize(11)
     else:
         # Apply to single text object
         text_content = ax_or_text.get_text()
-        if regex.search(r'\p{Devanagari}', text_content):
+        has_devanagari = bool(regex.search(r'\p{Devanagari}', text_content))
+        has_emoji = any(c in emoji.EMOJI_DATA for c in text_content)
+        
+        if has_devanagari and not has_emoji:
             ax_or_text.set_fontproperties(nepali_font)
 
 
@@ -381,7 +417,49 @@ class CaptumExplainer:
         else:
             aligned_attributions = word_attributions
         
-        return aligned_attributions
+        # Post-process: merge attributions for multi-word emoji translations
+        # Build reverse mapping to detect which words are parts of multi-word emojis
+        multi_word_phrases = set()
+        for emoji_char, nepali_text in self.emoji_to_nepali_map.items():
+            if ' ' in nepali_text:
+                multi_word_phrases.add(nepali_text)
+        
+        # Merge consecutive words that form a multi-word emoji phrase
+        merged_attributions = []
+        i = 0
+        while i < len(aligned_attributions):
+            word, score, signed_score = aligned_attributions[i]
+            
+            # Check if this word + next word(s) form a multi-word emoji phrase
+            merged = False
+            for phrase in multi_word_phrases:
+                phrase_words = phrase.split()
+                if i + len(phrase_words) <= len(aligned_attributions):
+                    # Check if consecutive words match the phrase
+                    candidate_words = [aligned_attributions[i + j][0] for j in range(len(phrase_words))]
+                    candidate_phrase = ' '.join(candidate_words)
+                    
+                    # Also check if any word is already the emoji (from display_tokens fix)
+                    has_emoji = any(c in emoji.EMOJI_DATA for c in word)
+                    
+                    if candidate_phrase == phrase or (has_emoji and len(phrase_words) > 1):
+                        # Found a multi-word emoji phrase - merge their scores
+                        total_abs_score = sum(aligned_attributions[i + j][1] for j in range(len(phrase_words)))
+                        total_signed_score = sum(aligned_attributions[i + j][2] for j in range(len(phrase_words)))
+                        
+                        # Find the corresponding emoji
+                        emoji_char = [e for e, n in self.emoji_to_nepali_map.items() if n == phrase][0]
+                        
+                        merged_attributions.append((emoji_char, total_abs_score, total_signed_score))
+                        i += len(phrase_words)  # Skip all words in the phrase
+                        merged = True
+                        break
+            
+            if not merged:
+                merged_attributions.append((word, score, signed_score))
+                i += 1
+        
+        return merged_attributions
     
     def visualize_bar_chart(self, explanation: Dict, save_path: Optional[str] = None,
                            show: bool = True, nepali_font: Optional[FontProperties] = None,
@@ -404,7 +482,7 @@ class CaptumExplainer:
         pred_conf = explanation['confidence']
         
         scores = [s for _, s, _ in word_attributions]
-        words = [w for w, _, _ in word_attributions]
+        words = [w.replace('_', ' ') for w, _, _ in word_attributions]  # Replace underscores
         signed_scores = [ss for _, _, ss in word_attributions]
         
         if figsize is None:
@@ -473,6 +551,9 @@ class CaptumExplainer:
         text_objs = []
         
         for word, score, signed_score in word_attributions:
+            # Replace underscores with spaces for display
+            display_word = word.replace('_', ' ')
+            
             # Normalize for color
             intensity = min(score / max_score, 1.0) if max_score > 0 else 0.0
             
@@ -483,7 +564,7 @@ class CaptumExplainer:
                 color = cmap(0.5 - intensity * 0.5)  # Red side
             
             txt = ax.text(
-                x, y, f" {word} ",
+                x, y, f" {display_word} ",
                 fontsize=13,
                 bbox=dict(
                     facecolor=mcolors.to_hex(color),
@@ -493,15 +574,18 @@ class CaptumExplainer:
                 )
             )
             
-            # Apply Nepali font only to Devanagari text
-            if nepali_font and regex.search(r'\p{Devanagari}', word):
+            # Apply Nepali font only to Devanagari text (but not if it contains emojis)
+            has_emoji = any(c in emoji.EMOJI_DATA for c in display_word)
+            has_devanagari = bool(regex.search(r'\p{Devanagari}', display_word))
+            
+            if nepali_font and has_devanagari and not has_emoji:
                 txt.set_fontproperties(nepali_font)
             
             text_objs.append(txt)
             
             # Update position - emojis take less horizontal space
-            char_width = 0.025 if any(c in emoji.EMOJI_DATA for c in word) else 0.04
-            x += char_width * len(word) + 0.01
+            char_width = 0.025 if any(c in emoji.EMOJI_DATA for c in display_word) else 0.04
+            x += char_width * len(display_word) + 0.01
             
             if x > 0.92:
                 x = 0.01
