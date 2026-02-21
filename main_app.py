@@ -184,6 +184,11 @@ if 'model_wrapper' not in st.session_state:
     st.session_state.model_wrapper = None
 if 'nepali_font' not in st.session_state:
     st.session_state.nepali_font = None
+# Session statistics
+if 'session_predictions' not in st.session_state:
+    st.session_state.session_predictions = 0
+if 'session_class_counts' not in st.session_state:
+    st.session_state.session_class_counts = {'NO': 0, 'OO': 0, 'OR': 0, 'OS': 0}
 
 # ============================================================================
 # MODEL LOADING
@@ -673,19 +678,52 @@ def main():
         st.markdown("---")
         
         st.header("📊 Statistics")
+        
+        # Session Statistics (always visible)
+        st.subheader("🔄 Current Session")
+        if st.session_state.session_predictions > 0:
+            st.metric("Predictions", st.session_state.session_predictions)
+            
+            # Show session distribution
+            session_counts = st.session_state.session_class_counts
+            if any(count > 0 for count in session_counts.values()):
+                st.write("**Session Distribution:**")
+                for label in ['NO', 'OO', 'OR', 'OS']:
+                    count = session_counts.get(label, 0)
+                    if count > 0:
+                        pct = (count / st.session_state.session_predictions) * 100
+                        st.write(f"• {label}: {count} ({pct:.0f}%)")
+        else:
+            st.info("No predictions in this session yet.")
+        
+        st.markdown("---")
+        
+        # History Statistics (if available)
+        st.subheader("📚 All Time")
         if os.path.exists('data/prediction_history.json'):
             try:
-                with open('data/prediction_history.json', 'r') as f:
+                with open('data/prediction_history.json', 'r', encoding='utf-8') as f:
                     history = json.load(f)
-                st.metric("Total Predictions", len(history))
                 
                 if history:
+                    st.metric("Total Saved", len(history))
+                    
                     pred_counts = pd.Series([h['prediction'] for h in history]).value_counts()
                     st.write("**Distribution:**")
                     for label, count in pred_counts.items():
                         st.write(f"• {label}: {count}")
-            except:
-                pass
+                else:
+                    st.info("No saved predictions yet.")
+            except Exception as e:
+                st.warning("⚠️ History file error")
+                with st.expander("Error details"):
+                    st.code(str(e))
+        else:
+            st.info("""
+            📝 **No history file**
+            
+            Enable "Save to history" in Tab 1 to track predictions permanently.
+            """)
         
         st.markdown("---")
         st.markdown("""
@@ -768,6 +806,13 @@ def main():
                 
                 st.session_state.last_prediction = result
                 st.session_state.last_text = text_input
+                
+                # Update session statistics
+                if 'prediction' in result:
+                    st.session_state.session_predictions += 1
+                    pred_label = result['prediction']
+                    if pred_label in st.session_state.session_class_counts:
+                        st.session_state.session_class_counts[pred_label] += 1
                 
                 # Save to history
                 if save_to_history:
@@ -1121,6 +1166,15 @@ def main():
                         # Store in session state with mode flag
                         st.session_state.batch_results = pd.DataFrame(results)
                         st.session_state.batch_mode = 'text_area'
+                        
+                        # Update session statistics for batch
+                        for result in results:
+                            if result['Prediction'] != 'Error':
+                                st.session_state.session_predictions += 1
+                                pred_label = result['Prediction']
+                                if pred_label in st.session_state.session_class_counts:
+                                    st.session_state.session_class_counts[pred_label] += 1
+                        
                         st.rerun()
                 else:
                     st.warning("Please enter some texts.")
@@ -1247,6 +1301,14 @@ def main():
                             st.session_state.batch_results = df
                             st.session_state.batch_mode = 'csv'
                             st.session_state.csv_text_column = text_column
+                            
+                            # Update session statistics for CSV batch
+                            for pred in predictions:
+                                if pred != 'Error':
+                                    st.session_state.session_predictions += 1
+                                    if pred in st.session_state.session_class_counts:
+                                        st.session_state.session_class_counts[pred] += 1
+                            
                             st.rerun()
                     
                     # Display results OUTSIDE button block if they exist

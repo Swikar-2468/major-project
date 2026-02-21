@@ -339,5 +339,73 @@
       "has_mixed_sentiment": 0
     },
     "feedback": null
+  },
+  {
+    "timestamp": "2026-02-21T17:00:43.270490",
+    "text": "शुभ रात्री 🌙\n",
+    "prediction": "NO",
+    "confidence": 0.964146077632904,
+    "probabilities": {
+      "NO": 0.964146077632904,
+      "OO": 0.029665546491742134,
+      "OR": 0.0027578747831285,
+      "OS": 0.0034304847940802574
+    },
+    "preprocessed_text": "शुभ रात्री चन्द्रमा",
+    "emoji_features": {
+      "has_hate_emoji": 0,
+      "has_mockery_emoji": 0,
+      "has_positive_emoji": 0,
+      "has_sadness_emoji": 0,
+      "has_fear_emoji": 0,
+      "has_disgust_emoji": 0,
+      "hate_emoji_count": 0,
+      "mockery_emoji_count": 0,
+      "positive_emoji_count": 0,
+      "sadness_emoji_count": 0,
+      "fear_emoji_count": 0,
+      "disgust_emoji_count": 0,
+      "total_emoji_count": 1,
+      "hate_to_positive_ratio": 0.0,
+      "has_mixed_sentiment": 0,
+      "unknown_emoji_count": 0,
+      "has_unknown_emoji": 0,
+      "known_emoji_ratio": 1.0
+    },
+    "feedback": null
+  },
+  {
+    "timestamp": "2026-02-21T17:07:37.056570",
+    "text": "\"पोथी बस्यो भनेर राष्ट्रपति बनायो, अब देश डुबिहाल्छ। १८ करोडको गाडी चढेर जनताको दुख बुझ्दिनन् यस्ती आइमाईले 😡 😡 😡\"\n",
+    "prediction": "OS",
+    "confidence": 0.8900164365768433,
+    "probabilities": {
+      "NO": 0.04729283228516579,
+      "OO": 0.05346325412392616,
+      "OR": 0.009227456524968147,
+      "OS": 0.8900164365768433
+    },
+    "preprocessed_text": "पोथी बस्यो भनेर राष्ट्रपति बनायो, अब देश डुबिहाल्छ. १८ करोडको गाडी चढेर जनताको दुख बुझ्दिनन् यस्ती आइमाईले ठूलो_रिस ठूलो_रिस ठूलो_रिस",
+    "emoji_features": {
+      "has_hate_emoji": 1,
+      "has_mockery_emoji": 0,
+      "has_positive_emoji": 0,
+      "has_sadness_emoji": 0,
+      "has_fear_emoji": 0,
+      "has_disgust_emoji": 0,
+      "hate_emoji_count": 3,
+      "mockery_emoji_count": 0,
+      "positive_emoji_count": 0,
+      "sadness_emoji_count": 0,
+      "fear_emoji_count": 0,
+      "disgust_emoji_count": 0,
+      "total_emoji_count": 3,
+      "hate_to_positive_ratio": 3.0,
+      "has_mixed_sentiment": 0,
+      "unknown_emoji_count": 0,
+      "has_unknown_emoji": 0,
+      "known_emoji_ratio": 1.0
+    },
+    "feedback": null
   }
 ]
