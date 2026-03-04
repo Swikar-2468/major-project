@@ -611,5 +611,39 @@
       "known_emoji_ratio": 1.0
     },
     "feedback": null
+  },
+  {
+    "timestamp": "2026-03-04T13:31:52.189612",
+    "text": "RIP\n",
+    "prediction": "NO",
+    "confidence": 0.8510262966156006,
+    "probabilities": {
+      "NO": 0.8510262966156006,
+      "OO": 0.13526834547519684,
+      "OR": 0.004800678696483374,
+      "OS": 0.008904566988348961
+    },
+    "preprocessed_text": "ऱीP",
+    "emoji_features": {
+      "has_hate_emoji": 0,
+      "has_mockery_emoji": 0,
+      "has_positive_emoji": 0,
+      "has_sadness_emoji": 0,
+      "has_fear_emoji": 0,
+      "has_disgust_emoji": 0,
+      "hate_emoji_count": 0,
+      "mockery_emoji_count": 0,
+      "positive_emoji_count": 0,
+      "sadness_emoji_count": 0,
+      "fear_emoji_count": 0,
+      "disgust_emoji_count": 0,
+      "total_emoji_count": 0,
+      "hate_to_positive_ratio": 0.0,
+      "has_mixed_sentiment": 0,
+      "unknown_emoji_count": 0,
+      "has_unknown_emoji": 0,
+      "known_emoji_ratio": 0.0
+    },
+    "feedback": null
   }
 ]
