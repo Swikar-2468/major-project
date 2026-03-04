@@ -1,4 +1,4 @@
-# 🇳🇵 Nepali Hate Speech Detection System
+# 🇳🇵 Nepali Hate Content Detection System
 
 [![Python 3.8+](https://img.shields.io/badge/python-3.8+-blue.svg)](https://www.python.org/downloads/)
 [![PyTorch](https://img.shields.io/badge/PyTorch-2.0+-ee4c2c.svg)](https://pytorch.org/)
@@ -6,7 +6,7 @@
 [![License: MIT](https://img.shields.io/badge/License-MIT-green.svg)](LICENSE)
 [![Streamlit](https://img.shields.io/badge/Streamlit-1.28+-FF4B4B.svg)](https://streamlit.io/)
 
-A state-of-the-art hate speech detection system for Nepali social media text, featuring advanced preprocessing for mixed-script content, transformer-based classification, and comprehensive explainability methods.
+A state-of-the-art hate content detection system for Nepali social media text, featuring advanced preprocessing for mixed-script content, transformer-based classification, and comprehensive explainability methods.
 
 ---
 
@@ -22,8 +22,6 @@ A state-of-the-art hate speech detection system for Nepali social media text, fe
 - [Usage](#usage)
 - [Project Structure](#project-structure)
 - [Dataset](#dataset)
-- [Training](#training)
-- [Explainability](#explainability)
 - [Contributing](#contributing)
 - [Citation](#citation)
 - [License](#license)
@@ -33,7 +31,7 @@ A state-of-the-art hate speech detection system for Nepali social media text, fe
 
 ## 🎯 Overview
 
-This project implements a multi-class text classification system for detecting hate speech in Nepali social media content. The system classifies text into four categories:
+This project implements a multi-class text classification system for detecting hate content in Nepali social media content. The system classifies text into four categories:
 
 | Class | Label | Description |
 |-------|-------|-------------|
@@ -512,7 +510,7 @@ The application will open in your browser at `http://localhost:8501`
 ## 📁 Project Structure
 
 ```
-nepali-hate-speech-detection/
+major-project/
 ├── main_app.py                      # Streamlit web application
 ├── requirements.txt                 # Python dependencies
 ├── README.md                       # Project documentation
@@ -694,9 +692,9 @@ black scripts/ main_app.py
 If you use this work in your research, please cite:
 
 ```bibtex
-@misc{nepali-hate-speech-2025,
+@misc{nepali-hate-content-2025,
   author = {Uddav Rajbhandari},
-  title = {Nepali Hate Speech Detection System with Transformer-based Models},
+  title = {Nepali Hate content Detection System with Transformer-based Models},
   year = {2026},
   publisher = {GitHub},
   url = {https://github.com/UddavRajbhandari/major-project}
@@ -761,7 +759,7 @@ copies of the Software...
 ## 🗺️ Roadmap
 
 ### Completed ✅
-- [x] Multi-class hate speech classification
+- [x] Multi-class hate content classification
 - [x] Mixed-script preprocessing pipeline
 - [x] Emoji semantic mapping (180+ emojis)
 - [x] Traditional ML baselines
@@ -776,7 +774,7 @@ copies of the Software...
 ### Future Work 🔮
 - [ ] Real-time social media monitoring
 - [ ] Multi-lingual expansion (Hindi, Bengali)
-- [ ] Temporal hate speech evolution analysis
+- [ ] Temporal hate content evolution analysis
 - [ ] User feedback integration
 - [ ] Bias detection and mitigation
 - [ ] Adversarial robustness testing
@@ -785,7 +783,7 @@ copies of the Software...
 
 ## ⚠️ Disclaimer
 
-This tool is designed for research and educational purposes. Automated hate speech detection systems are not perfect and should not be used as the sole basis for content moderation decisions. Human oversight and context consideration are essential for responsible deployment.
+This tool is designed for research and educational purposes. Automated hate content detection systems are not perfect and should not be used as the sole basis for content moderation decisions. Human oversight and context consideration are essential for responsible deployment.
 
 **Limitations:**
 - Model performance varies across classes (especially minority classes)
