@@ -379,7 +379,7 @@ Features: {hate_emoji_count: 2, total_emoji_count: 2, ...}
 
 ### Web Application Interface
 
-![Main Interface](docs/images/app_main_interface.png)
+![Main Interface](notebooks/models/saved_models/app_main_interface.png)
 
 **Single Text Prediction:**
 
