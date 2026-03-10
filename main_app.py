@@ -46,6 +46,10 @@ try:
         check_availability as check_captum_availability
     )
     CUSTOM_MODULES_AVAILABLE = True
+except MemoryError:
+    st.warning("⚠️ Captum not available due to memory constraints.")
+    CUSTOM_MODULES_AVAILABLE = False
+    captum_available = False
 except ImportError as e:
     st.error(f"⚠️ Custom modules not found: {e}")
     CUSTOM_MODULES_AVAILABLE = False
@@ -554,45 +558,40 @@ def render_batch_explainability(results_df, text_column, model, tokenizer, label
                             st.warning("No word scores available")
                     
                     elif explain_method == "Captum (IG)":
-                        captum_exp = CaptumExplainer(
-                            model, tokenizer, label_encoder, preprocessor,
-                            emoji_to_nepali_map=EMOJI_TO_NEPALI
-                        )
-                        result = captum_exp.explain_and_visualize(
-                            analysis['original_text'],
-                            target=None,
-                            n_steps=50,
-                            save_dir=None,
-                            show=False,
-                            nepali_font=nepali_font
-                        )
-                        
-                        st.subheader("Captum Integrated Gradients")
-                        
-                        col1, col2 = st.columns(2)
-                        with col1:
-                            st.markdown("**Bar Chart**")
-                            st.pyplot(result['bar_chart'])
-                        
-                        with col2:
-                            st.markdown("**Heatmap**")
-                            st.pyplot(result['heatmap'])
-                        
-                        # Show details directly without nested expander
-                        st.markdown("---")
-                        st.markdown("**📊 Attribution Details:**")
-                        st.write(f"**Convergence Delta:** {result['explanation']['convergence_delta']:.6f}")
-                        
-                        word_attrs = result['explanation']['word_attributions']
-                        if word_attrs:
-                            df = pd.DataFrame(
-                                word_attrs,
-                                columns=['Word', 'Abs Score', 'Signed Score']
+                        try:
+                            captum_exp = CaptumExplainer(
+                                model, tokenizer, label_encoder, preprocessor,
+                                emoji_to_nepali_map=EMOJI_TO_NEPALI
                             )
-                            df = df.sort_values('Abs Score', ascending=False)
-                            st.dataframe(df, hide_index=True, use_container_width=True)
-                        else:
-                            st.warning("No word attributions available")
+                            result = captum_exp.explain_and_visualize(
+                                analysis['original_text'],
+                                target=None,
+                                n_steps=50,
+                                save_dir=None,
+                                show=False,
+                                nepali_font=nepali_font
+                            )
+                            st.subheader("Captum Integrated Gradients")
+                            col1, col2 = st.columns(2)
+                            with col1:
+                                st.markdown("**Bar Chart**")
+                                st.pyplot(result['bar_chart'])
+                            with col2:
+                                st.markdown("**Heatmap**")
+                                st.pyplot(result['heatmap'])
+                            st.markdown("---")
+                            st.markdown("**📊 Attribution Details:**")
+                            st.write(f"**Convergence Delta:** {result['explanation']['convergence_delta']:.6f}")
+                            word_attrs = result['explanation']['word_attributions']
+                            if word_attrs:
+                                df = pd.DataFrame(word_attrs, columns=['Word', 'Abs Score', 'Signed Score'])
+                                df = df.sort_values('Abs Score', ascending=False)
+                                st.dataframe(df, hide_index=True, use_container_width=True)
+                            else:
+                                st.warning("No word attributions available")
+                        except (MemoryError, RuntimeError):
+                            st.error("❌ Captum (Integrated Gradients) requires more memory than available on this server.")
+                            st.info("💡 **Tip:** Use LIME or SHAP instead — they work on cloud deployments. Captum works on local machines with more RAM/GPU.")
                 
                 except Exception as e:
                     st.error(f"❌ Explanation failed: {str(e)}")
@@ -1029,42 +1028,36 @@ def main():
                             st.dataframe(df, hide_index=True, use_container_width=True)
                     
                     elif method == "Captum (IG)":
-                        captum_exp = CaptumExplainer(
-                            model, tokenizer, label_encoder, preprocessor,
-                            emoji_to_nepali_map=EMOJI_TO_NEPALI
-                        )
-                        
-                        result = captum_exp.explain_and_visualize(
-                            analysis['original_text'],
-                            target=None,
-                            n_steps=n_steps,
-                            save_dir=None,  # Changed from save_path
-                            show=False,
-                            nepali_font=nepali_font
-                        )
-                        
-                        st.subheader("Captum Integrated Gradients")
-                        
-                        col1, col2 = st.columns(2)
-                        
-                        with col1:
-                            st.markdown("**Bar Chart**")
-                            st.pyplot(result['bar_chart'])
-                        
-                        with col2:
-                            st.markdown("**Heatmap**")
-                            st.pyplot(result['heatmap'])
-                        
-                        with st.expander("📊 Attribution Details"):
-                            st.write(f"**Convergence Delta:** {result['explanation']['convergence_delta']:.6f}")
-                            
-                            word_attrs = result['explanation']['word_attributions']
-                            df = pd.DataFrame(
-                                word_attrs,
-                                columns=['Word', 'Abs Score', 'Signed Score']
+                        try:
+                            captum_exp = CaptumExplainer(
+                                model, tokenizer, label_encoder, preprocessor,
+                                emoji_to_nepali_map=EMOJI_TO_NEPALI
                             )
-                            df = df.sort_values('Abs Score', ascending=False)
-                            st.dataframe(df, hide_index=True, use_container_width=True)
+                            result = captum_exp.explain_and_visualize(
+                                analysis['original_text'],
+                                target=None,
+                                n_steps=n_steps,
+                                save_dir=None,
+                                show=False,
+                                nepali_font=nepali_font
+                            )
+                            st.subheader("Captum Integrated Gradients")
+                            col1, col2 = st.columns(2)
+                            with col1:
+                                st.markdown("**Bar Chart**")
+                                st.pyplot(result['bar_chart'])
+                            with col2:
+                                st.markdown("**Heatmap**")
+                                st.pyplot(result['heatmap'])
+                            with st.expander("📊 Attribution Details"):
+                                st.write(f"**Convergence Delta:** {result['explanation']['convergence_delta']:.6f}")
+                                word_attrs = result['explanation']['word_attributions']
+                                df = pd.DataFrame(word_attrs, columns=['Word', 'Abs Score', 'Signed Score'])
+                                df = df.sort_values('Abs Score', ascending=False)
+                                st.dataframe(df, hide_index=True, use_container_width=True)
+                        except (MemoryError, RuntimeError) as mem_err:
+                            st.error("❌ Captum (Integrated Gradients) requires more memory than available on this server.")
+                            st.info("💡 **Tip:** Use LIME or SHAP instead — they work great on cloud deployments. Captum works on local machines with more RAM/GPU.")
                 
                 except Exception as e:
                     st.error(f"❌ Explanation failed: {str(e)}")
@@ -1262,7 +1255,12 @@ def main():
             
             if uploaded_file:
                 try:
-                    df = pd.read_csv(uploaded_file)
+                    # Try multiple encodings for Nepali text compatibility
+                    try:
+                        df = pd.read_csv(uploaded_file, encoding='utf-8')
+                    except UnicodeDecodeError:
+                        uploaded_file.seek(0)
+                        df = pd.read_csv(uploaded_file, encoding='latin-1')
                     st.write("📄 **File Preview:**")
                     st.dataframe(df.head(10), use_container_width=True)
                     

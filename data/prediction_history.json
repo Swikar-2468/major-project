@@ -645,5 +645,73 @@
       "known_emoji_ratio": 0.0
     },
     "feedback": null
+  },
+  {
+    "timestamp": "2026-03-04T13:56:33.080499",
+    "text": "नमस्ते साथीहरू! आज म तपाईंहरूलाई एउटा कुरा भन्न चाहन्छु। यो देशमा केही मान्छेहरूले अरूलाई हेप्ने, गाली गर्ने, जाति र धर्मका आधारमा घृणा फैलाउने काम गरिरहेका छन्। यस्तो गर्नु एकदम गलत हो। हामी सबै नेपाली हौं, एउटै देशका नागरिक हौं। माया र सम्मानले मात्र देश अगाडि बढ्छ। धन्यवाद! 🙏🇳🇵\n",
+    "prediction": "NO",
+    "confidence": 0.8932748436927795,
+    "probabilities": {
+      "NO": 0.8932748436927795,
+      "OO": 0.07412826269865036,
+      "OR": 0.01632402464747429,
+      "OS": 0.01627301052212715
+    },
+    "preprocessed_text": "नमस्ते साथीहरू! आज म तपाईंहरूलाई एउटा कुरा भन्न चाहन्छु. यो देशमा केही मान्छेहरूले अरूलाई हेप्ने, गाली गर्ने, जाति र धर्मका आधारमा घृणा फैलाउने काम गरिरहेका छन्. यस्तो गर्नु एकदम गलत हो. हामी सबै नेपाली हौं, एउटै देशका नागरिक हौं. माया र सम्मानले मात्र देश अगाडि बढ्छ. धन्यवाद! नमस्कार नेपाल",
+    "emoji_features": {
+      "has_hate_emoji": 0,
+      "has_mockery_emoji": 0,
+      "has_positive_emoji": 1,
+      "has_sadness_emoji": 0,
+      "has_fear_emoji": 0,
+      "has_disgust_emoji": 0,
+      "hate_emoji_count": 0,
+      "mockery_emoji_count": 0,
+      "positive_emoji_count": 1,
+      "sadness_emoji_count": 0,
+      "fear_emoji_count": 0,
+      "disgust_emoji_count": 0,
+      "total_emoji_count": 1,
+      "hate_to_positive_ratio": 0.0,
+      "has_mixed_sentiment": 0,
+      "unknown_emoji_count": 0,
+      "has_unknown_emoji": 0,
+      "known_emoji_ratio": 1.0
+    },
+    "feedback": null
+  },
+  {
+    "timestamp": "2026-03-10T19:48:54.065236",
+    "text": "\"यो नपुंसकहरुले पनि स्तन हुन्छ रे, तर काम लाग्दैन। फाल्तु जात यस्तो 🤦‍♂️\"\n",
+    "prediction": "OR",
+    "confidence": 0.5286386013031006,
+    "probabilities": {
+      "NO": 0.0201066005975008,
+      "OO": 0.027375921607017517,
+      "OR": 0.5286386013031006,
+      "OS": 0.42387887835502625
+    },
+    "preprocessed_text": "यो नपुंसकहरुले पनि स्तन हुन्छ रे, तर काम लाग्दैन. फाल्तु जात यस्तो 🤦♂️",
+    "emoji_features": {
+      "has_hate_emoji": 0,
+      "has_mockery_emoji": 0,
+      "has_positive_emoji": 0,
+      "has_sadness_emoji": 0,
+      "has_fear_emoji": 0,
+      "has_disgust_emoji": 0,
+      "hate_emoji_count": 0,
+      "mockery_emoji_count": 0,
+      "positive_emoji_count": 0,
+      "sadness_emoji_count": 0,
+      "fear_emoji_count": 0,
+      "disgust_emoji_count": 0,
+      "total_emoji_count": 2,
+      "hate_to_positive_ratio": 0.0,
+      "has_mixed_sentiment": 0,
+      "unknown_emoji_count": 2,
+      "has_unknown_emoji": 1,
+      "known_emoji_ratio": 0.0
+    },
+    "feedback": null
   }
 ]
