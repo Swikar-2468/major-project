@@ -7,7 +7,9 @@
 [![Streamlit](https://img.shields.io/badge/Streamlit-1.28+-FF4B4B.svg)](https://streamlit.io/)
 
 A state-of-the-art hate content detection system for Nepali social media text, featuring advanced preprocessing for mixed-script content, transformer-based classification, and comprehensive explainability methods.
-
+## Web Application
+A production web interface for this project is deployed separately:
+**[→ nepali-hate-detector-app](https://github.com/UddavRajbhandari/nepali-hate-detector-app)**
 ---
 
 ## 📋 Table of Contents

@@ -2,3 +2,6 @@ python scripts/explainability.py \
     --local_model_path models/saved_models/xlm_roberta_results/large_final \
     --hf_model_id UDHOV/xlm-roberta-large-nepali-hate-classification \
     --test_data data/test.json
+
+uvicorn backend.app.main:app --reload --host 0.0.0.0 --port 8000
+streamlit run main_app.py

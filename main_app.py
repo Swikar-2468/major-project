@@ -206,6 +206,7 @@ def load_model_and_preprocessor():
     
     local_model_path = 'models/saved_models/xlm_roberta_results/large_final'
     hf_model_id = "UDHOV/xlm-roberta-large-nepali-hate-classification"
+    # hf_model_id = "UDHOV/nepalibert-nepali-hate-classification"
     device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
     
     # Initialize label encoder
