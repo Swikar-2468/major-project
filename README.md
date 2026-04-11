@@ -9,7 +9,7 @@
 A state-of-the-art hate content detection system for Nepali social media text, featuring advanced preprocessing for mixed-script content, transformer-based classification, and comprehensive explainability methods.
 ## Web Application
 A production web interface for this project is deployed separately:
-**[→ nepali-hate-detector-app](https://github.com/UddavRajbhandari/nepali-hate-detector-app)**
+**[→ nepali-hate-detector-app](https://github.com/UddavRajbhandari/Nepali-Hate-Content-Detector-App)**
 ---
 
 ## 📋 Table of Contents
